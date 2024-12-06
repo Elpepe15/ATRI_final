@@ -553,21 +553,59 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
                 if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
                 // if (!isCai) return await ATRI.reply(from, eng.notCaiMember(), id)
                 if (!q) return await ATRI.reply(from, eng.wrongFormat(), id)
-                try {
-                    await ATRI.simulateTyping(from, true)
-                    console.log(color('[AI]', 'cyan'), color(`Thinking the answers for "${q}"...`, 'yellow'))
-                    const characterId = config.ATRITOKEN;
-                    const chat = await characterAI.createOrContinueChat(characterId);
-                    const balas = await chat.sendAndAwaitResponse(q, true);
-                    const originalString = balas.text;
-                    const modifiedString = swapBintang(originalString);
+                if (isMedia && isImage || isQuotedImage) {
+                    try {
+                        await ATRI.simulateTyping(from, true)
+                        const encryptMedia = isQuotedImage ? quotedMsg : message
+                        const mediaData = await decryptMedia(encryptMedia)
+                        const _mimetype = isQuotedImage ? quotedMsg.mimetype : mimetype
+                        const imageBase64 = `data:${_mimetype};base64,${mediaData.toString('base64')}`
+                        const balas = await chat.sendAndAwaitResponse({
+                            text: ar[0],
+                            image_rel_path: imageBase64,
+                            image_description: ar[0],
+                            image_description_type: "HUMAN"
+                        }, true);
+                        await ATRI.reply(from, balas.text, id)
+                        await ATRI.simulateTyping(from, false);
+                    } catch (err) {
+                        console.error(err)
+                        await ATRI.reply(from, `Error: ${err.message}`, id)
+                    }
+                } else {
+                    try {
+                        await ATRI.simulateTyping(from, true)
+                        console.log(color('[AI]', 'cyan'), color(`Thinking the answers for "${q}"...`, 'yellow'))
+                        const characterId = config.ATRITOKEN;
+                        const chat = await characterAI.createOrContinueChat(characterId);
+                        const balas = await chat.sendAndAwaitResponse(q, true);
+                        const originalString = balas.text;
+                        const modifiedString = swapBintang(originalString);
 
-                    await ATRI.reply(from, modifiedString, id)
-                    await ATRI.simulateTyping(from, false)
+                        await ATRI.reply(from, modifiedString, id)
+                        await ATRI.simulateTyping(from, false)
+                    } catch (err) {
+                        console.error(err)
+                        await ATRI.reply(from, `Error: ${err.message}`, id)
+                    }
+                }
+                break
+            case 'ci':
+                if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
+                const characterId = config.ATRITOKEN;
+                try {
+                    const chat = await characterAI.createOrContinueChat(characterId);
+                    const bal_img = await chat.generateImage(ar[0])
+
+                    await ATRI.reply(from, bal_img, id)
+
                 } catch (err) {
                     console.error(err)
                     await ATRI.reply(from, `Error: ${err.message}`, id)
+
                 }
+
+
                 break
             case 'cai':
                 if (!isOwner) return await ATRI.reply(from, eng.ownerOnly(), id)
@@ -694,7 +732,7 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
                 await ATRI.reply(from, eng.wait(), id)
                 google({ 'query': q, 'no-display': true })
                     .then(async (results) => {
-                        let txt = `*── 「 GOOGLE SEARCH 」 ──*\n\n*by: rashidsiregar28*\n\n_*Search results for: ${q}*_`
+                        let txt = `*── 「 GOOGLE SEARCH 」 ──*\n\n*by: AF*\n\n_*Search results for: ${q}*_`
                         for (let i = 0; i < results.length; i++) {
                             txt += `\n\n➸ *Title*: ${results[i].title}\n➸ *Desc*: ${results[i].snippet}\n➸ *Link*: ${results[i].link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
                         }
@@ -858,7 +896,7 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
                 if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
                 if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ATRI.reply(from, eng.limit(), id)
                 limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                
+
                 break
             case 'bass':
                 if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
