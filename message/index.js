@@ -547,6 +547,26 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
             //         await ATRI.reply(from, `Error: ${err.message}`, id)
             //     }
             //     break
+            // case 'image':
+            // case 'img':
+            //     if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
+            //     if (config.openAiKey == 'api-key') return await ATRI.reply(from, 'Invalid OpenAi Apikey. Please get your ApiKey at: https://platform.openai.com/account/api-keys', id)
+            //     if (!q) return await ATRI.reply(from, eng.wrongFormat(), id)
+            //     await ATRI.reply(from, eng.wait(), id)
+            //     try {
+            //         const configuration = new Configuration({ apiKey: config.openAiKey })
+            //         const openai = new OpenAIApi(configuration)
+            //         const completion = await openai.createImage({
+            //             prompt: q,
+            //             n: 1,
+            //             size: '1024x1024',
+            //         })
+            //         await ATRI.sendFileFromUrl(from, completion.data.data[0].url, 'image.jpg', null, id)
+            //     } catch (err) {
+            //         console.error(err)
+            //         await ATRI.reply(from, `Error: ${err.message}`, id)
+            //     }
+            //     break
 
             // =========================== UPDATE ============================//
             case 'c':
@@ -592,13 +612,13 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
                 break
             case 'ci':
                 if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
+                // if (!isCai) return await ATRI.reply(from, eng.notCaiMember(), id)
                 const characterId = config.ATRITOKEN;
                 try {
                     const chat = await characterAI.createOrContinueChat(characterId);
                     const bal_img = await chat.generateImage(ar[0])
-
-                    await ATRI.reply(from, bal_img, id)
-
+                    console.log(color('[AI]', 'cyan'), color(`Thinking the answers for "${ar[0]}"...`, 'yellow'))
+                    await ATRI.sendFileFromUrl(from, bal_img, 'biji.webp', `nih ${pushname}, hasil dari ${ar[0]}`, id)
                 } catch (err) {
                     console.error(err)
                     await ATRI.reply(from, `Error: ${err.message}`, id)
@@ -665,26 +685,7 @@ module.exports = msgHandler = async (ATRI = new Client(), message) => {
 
             // =========================== UPDATE END ============================//
 
-            case 'image':
-            case 'img':
-                if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
-                if (config.openAiKey == 'api-key') return await ATRI.reply(from, 'Invalid OpenAi Apikey. Please get your ApiKey at: https://platform.openai.com/account/api-keys', id)
-                if (!q) return await ATRI.reply(from, eng.wrongFormat(), id)
-                await ATRI.reply(from, eng.wait(), id)
-                try {
-                    const configuration = new Configuration({ apiKey: config.openAiKey })
-                    const openai = new OpenAIApi(configuration)
-                    const completion = await openai.createImage({
-                        prompt: q,
-                        n: 1,
-                        size: '1024x1024',
-                    })
-                    await ATRI.sendFileFromUrl(from, completion.data.data[0].url, 'image.jpg', null, id)
-                } catch (err) {
-                    console.error(err)
-                    await ATRI.reply(from, `Error: ${err.message}`, id)
-                }
-                break
+
             case 'ocr': // OCR by VideFrelan
                 if (!isRegistered) return await ATRI.reply(from, eng.notRegistered(), id)
                 const ocrconf = {
